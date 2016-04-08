@@ -12,15 +12,19 @@ defmodule Can.Authorizer do
   """
   def authorize(conn, action, %Ecto.Changeset{} = changeset) do
     action = action || fetch_private!(conn, :phoenix_action)
-    trusted =
+    policy =
       changeset.model.__struct__
       |> policy_module
-      |> apply_policy(action, [conn, changeset])
+
+    trusted = apply_policy(policy, action, [conn, changeset])
 
     if trusted do
-      put_private(conn, :can_authorized, true)
+      conn
+      |> put_private(:can_authorized, true)
     else
       conn
+      |> put_private(:can_authorized, false)
+      |> put_private(:can_policy, policy)
     end
   end
   @doc """
@@ -28,16 +32,19 @@ defmodule Can.Authorizer do
   """
   def authorize(conn, action, args) when is_list(args) do
     action = action || fetch_private!(conn, :phoenix_action)
-    trusted =
-      conn
+    policy = conn
       |> fetch_private!(:phoenix_controller)
       |> policy_module("Controller")
-      |> apply_policy(action, [conn] ++ args)
+
+    trusted = apply_policy(policy, action, [conn] ++ args)
 
     if trusted do
-      put_private(conn, :can_authorized, true)
+      conn
+      |> put_private(:can_authorized, true)
     else
       conn
+      |> put_private(:can_authorized, false)
+      |> put_private(:can_policy, policy)
     end
   end
   @doc """
@@ -45,15 +52,19 @@ defmodule Can.Authorizer do
   """
   def authorize(conn, action, model) when is_map(model) do
     action = action || fetch_private!(conn, :phoenix_action)
-    trusted =
+    policy =
       model.__struct__
       |> policy_module
-      |> apply_policy(action, [conn, model])
+
+    trusted = apply_policy(policy, action, [conn, model])
 
     if trusted do
-      put_private(conn, :can_authorized, true)
+      conn
+      |> put_private(:can_authorized, true)
     else
       conn
+      |> put_private(:can_authorized, false)
+      |> put_private(:can_policy, policy)
     end
   end
 end

@@ -36,6 +36,8 @@ defmodule Can.AuthorizerTest do
     defmodule UserController do
       use Can, :controller
 
+      # plug Can.AuthorizeConnection, handler: App.UnauthorizedHandler
+
       def show(conn, context \\ nil, action \\ nil) do
         if context == nil do
           authorize(conn, action)
@@ -50,7 +52,7 @@ defmodule Can.AuthorizerTest do
     default_conn = conn(:get, "/")
       |> put_private(:phoenix_action, :show)
       |> put_private(:phoenix_controller, App.UserController)
-      |> put_private(:can_authorized, false)
+
     {:ok, [default_conn: default_conn]}
   end
 
@@ -72,6 +74,7 @@ defmodule Can.AuthorizerTest do
       |> App.UserController.show(nil, :edit)
 
     assert authorize_conn_with_action.private[:can_authorized] == false
+    assert authorize_conn_with_action.private[:can_policy] == App.UserPolicy
   end
 
   test "#authorize with a model", %{default_conn: default_conn} do
@@ -84,6 +87,7 @@ defmodule Can.AuthorizerTest do
       |> App.UserController.show(%App.User{}, :edit)
 
     assert model_conn_with_action.private[:can_authorized] == false
+    assert model_conn_with_action.private[:can_policy] == App.UserPolicy
   end
 
   test "#authorize with a changeset", %{default_conn: default_conn} do
@@ -96,5 +100,6 @@ defmodule Can.AuthorizerTest do
       |> App.UserController.show(App.User.changeset(%App.User{}), :edit)
 
     assert changeset_conn_with_action.private[:can_authorized] == false
+    assert changeset_conn_with_action.private[:can_policy] == App.UserPolicy
   end
 end
