@@ -18,16 +18,16 @@ defmodule Can.AuthorizeConnectionTest do
     {:ok, [default_conn: default_conn]}
   end
 
-  test "initial conn map should have :can_unuthorized set to false", %{default_conn: default_conn} do
+  test "initial conn map should have :can_unuthorized set to nil", %{default_conn: default_conn} do
     conn = default_conn
-    assert conn.private[:can_authorized] == false
+    assert conn.private[:can_authorized] == nil
+    assert conn.private[:can_policy] == nil
   end
 
-  test "initial conn map should have :registered_callback set to UnauthorizedHandler", %{default_conn: default_conn} do
+  test "initial conn map should have a callback registered in the before_send array", %{default_conn: default_conn} do
     conn = default_conn
-    assert conn.private[:registered_callbacks]
+    assert length(conn.before_send) > 0
+    assert conn.before_send |> List.first |> is_function
   end
-
-
 end
 
