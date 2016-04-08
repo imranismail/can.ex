@@ -18,12 +18,6 @@ Generally, there are two things you need to explicitly implement in your applica
 1. AuthorizationPolicy
 2. UnauthorizedHandler
 
-UnauthorizedHandler are defined internally in Can as a default and it raises an exception.
-
-However, you can override the UnauthorizedHandler by defining handler: MyApp.UnauthorizedHandler and passing a lambda to the authorize/3 function.
-
-This gives you the ability to handle unauthorized cases in a more meaningful way, instead of crashing indefinitely.
-
 Step 1. Add Can.AuthorizeConnection plug to your Router pipeline
 ```elixir
 defmodule MyApp.Router do
@@ -66,25 +60,19 @@ def MyApp.UserPolicy do
 end
 ```
 
-You can write your own authorization logic as complex or as simple as you wish. It is necessary however, at the end of your authorization logic, it has to return either true or false.
+You can write your own authorization logic as complex or as simple as you wish. It is necessary however, at the end of your authorization logic, it has to return a boolean value.
 
-In the case when the authorization logic returns true, the connection proceeds normally. If the authorization logic return false, an Exception is triggered.
+In the case when the authorization logic returns true, the connection proceeds normally. If the authorization logic return false, UnauthorizedHandler will handle the connection.
 
-(optional) Step 4. Define your own UnauthorizedHandler, by default it is defined as the following
+Step 4. Define your own UnauthorizedHandler, by default it is defined as the following
 ```elixir
 defmodule Aleuto.UnauthorizedHandler do
-  defexception plug_status:500, message: "you are unauthorized" <>
-  "to access this pipeline"
+  def handler(conn, UserPolicy) do
+    conn
+    |> send_resp(401, "Unauthorized")
+  end
 end
 ```
-
-## How it works
-Can works by simply adding authorization key into the `Plug.Conn` map. After evaluating policies, a `:can_authorized` atom of `true` or `false`
-are added to the `Plug.Conn` map.
-
-Can then calls `register_before_send/2` callback right before the response is sent to check for the status of `:can_authorized`, given that it is `true`,
-the response are sent normally. If it is `false`, an exception is raised.
-
 
 ## Documentation
 See [documentation](http://hexdocs.pm/can/) on hexdocs for API reference and usage details.
