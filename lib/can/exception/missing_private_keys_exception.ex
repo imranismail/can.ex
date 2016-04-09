@@ -10,7 +10,7 @@ defmodule Can.Exception.MissingPrivateKeys do
     %Can.Exception.MissingPrivateKeys
     {
       message: "you tried to " <>
-        "use Sentry.Authorizer module but it requires phoenix controller " <>
+        "use Can module but it requires phoenix controller " <>
         "pipeline to assign the `#{key}` key and value to the connection.",
       key: key
     }
