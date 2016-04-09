@@ -26,17 +26,7 @@ defmodule MyApp.PageController do
 end
 ```
 
-1. You will first need to define your policy by mirroring your controller naming convention and it's action
-
-```elixir
-def MyApp.PagePolicy do
-  def show(conn, page) do
-    conn.assign.current_user.id == page[:author_id]
-  end
-end
-```
-
-2. Use the can macro and add an unauthorized_handler
+Step 1: Use the can macro and add an unauthorized_handler
 
 ```elixir
 defmodule MyApp.PageController do
@@ -59,11 +49,27 @@ defmodule MyApp.PageController do
 end
 ```
 
+Step 2: Add the policy module and function
+
+Can will try to find the policy based on the second argument and the following pattern, therefore we need to adhere
+to a convention set by Phoenix
+
+- if no argument or `nil` is passed -> the policy will be based off the controller's name
+- if changeset or model struct is passed -> the policy will be based off the model's name
+
+```elixir
+def MyApp.PagePolicy do
+  def show(conn, page) do
+    conn.assign.current_user.id == page[:author_id]
+  end
+end
+```
+
 ### Alternative Handler
 
 The unauthorized handler can also be done in a separate module if you wish so.
 
-This effectively separates the handler and the controller, and makes pattern matching against the policy clean and readable
+This effectively separates the handler and the controller, and makes pattern matching against the policy clean, readable and reusable.
 
 ```elixir
 defmodule MyApp.PageController do
