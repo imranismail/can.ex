@@ -65,41 +65,23 @@ defmodule Can.AuthorizerTest do
   end
 
   test "#authorize", %{default_conn: default_conn} do
-    authorize_conn = default_conn
-      |> App.UserController.show
-
-    assert authorize_conn.private[:can_authorized] == true
-
-    authorize_conn_with_action = default_conn
-      |> App.UserController.show(nil, :edit)
-
-    assert authorize_conn_with_action.private[:can_authorized] == false
-    assert authorize_conn_with_action.private[:can_policy] == App.UserPolicy
+    assert {:ok, policy} = App.UserController.show(default_conn)
+    assert policy == Can.AuthorizerTest.App.UserPolicy
+    assert {:error, policy} = App.UserController.show(default_conn, nil, :edit)
+    assert policy == Can.AuthorizerTest.App.UserPolicy
   end
 
   test "#authorize with a model", %{default_conn: default_conn} do
-    model_conn = default_conn
-      |> App.UserController.show(%App.User{})
-
-    assert model_conn.private[:can_authorized] == true
-
-    model_conn_with_action = default_conn
-      |> App.UserController.show(%App.User{}, :edit)
-
-    assert model_conn_with_action.private[:can_authorized] == false
-    assert model_conn_with_action.private[:can_policy] == App.UserPolicy
+    assert {:ok, policy} = App.UserController.show(default_conn, %App.User{})
+    assert policy == Can.AuthorizerTest.App.UserPolicy
+    assert {:error, policy} = App.UserController.show(default_conn, %App.User{}, :edit)
+    assert policy == Can.AuthorizerTest.App.UserPolicy
   end
 
   test "#authorize with a changeset", %{default_conn: default_conn} do
-    changeset_conn = default_conn
-      |> App.UserController.show(App.User.changeset(%App.User{}))
-
-    assert changeset_conn.private[:can_authorized] == true
-
-    changeset_conn_with_action = default_conn
-      |> App.UserController.show(App.User.changeset(%App.User{}), :edit)
-
-    assert changeset_conn_with_action.private[:can_authorized] == false
-    assert changeset_conn_with_action.private[:can_policy] == App.UserPolicy
+    assert {:ok, policy} = App.UserController.show(default_conn, App.User.changeset(%App.User{}))
+    assert policy == Can.AuthorizerTest.App.UserPolicy
+    assert {:error, policy} = App.UserController.show(default_conn, App.User.changeset(%App.User{}), :edit)
+    assert policy == Can.AuthorizerTest.App.UserPolicy
   end
 end
