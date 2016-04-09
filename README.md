@@ -8,7 +8,7 @@ Add Can to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:can, "~>0.0.2"}]
+  [{:can, "~>0.0.3"}]
 end
 ```
 
