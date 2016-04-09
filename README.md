@@ -15,8 +15,8 @@ end
 ## Usage
 Generally, there are two things you need to explicitly implement in your application.
 
-1. AuthorizationPolicy
-2. UnauthorizedHandler
+1. Policy
+2. Unauthorized Handler
 
 Step 1. Use Can and the add the handler in your controller
 ```elixir
