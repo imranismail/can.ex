@@ -28,12 +28,14 @@ defmodule MyApp.PageController do
 end
 ```
 
-Step 1: Use the can macro and add an unauthorized_handler
+#### Step 1
+
+Use the can macro and add an unauthorized_handler
 
 ```elixir
 defmodule MyApp.PageController do
   use MyApp.Web, :controller
-  use Can, :unauthorized_handler
+  use Can, :unauthorized
 
   def show(conn, %{"id" => id}) do
     page = Repo.get(Page, id)
@@ -51,7 +53,9 @@ defmodule MyApp.PageController do
 end
 ```
 
-Step 2: Add the policy module and function
+#### Step 2
+
+Add the policy module and function
 
 Can will try to find the policy based on the second argument and the following pattern, therefore we need to adhere
 to a convention set by Phoenix
