@@ -44,7 +44,7 @@ defmodule Can.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:phoenix_ecto, "~> 2.0"},
-     {:phoenix, "~> 1.1"}]
+    [{:phoenix_ecto, "~> 2.0", only: :test},
+     {:phoenix, "~> 1.1", only: :test},]
   end
 end
