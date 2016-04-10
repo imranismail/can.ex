@@ -3,7 +3,7 @@ defmodule Can.Mixfile do
 
   def project do
     [app: :can,
-     version: "0.0.3",
+     version: "0.0.4",
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -44,7 +44,7 @@ defmodule Can.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:phoenix_ecto, "~> 2.0"},
-     {:phoenix, "~> 1.1"}]
+    [{:phoenix_ecto, "~> 2.0", only: :test},
+     {:phoenix, "~> 1.1", only: :test},]
   end
 end
