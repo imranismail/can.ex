@@ -2,6 +2,8 @@
 > Dead simple, fire and forget authorization kit for the Phoenix framework
 
 [![Build Status](https://semaphoreci.com/api/v1/imranismail/can/branches/master/badge.svg)](https://semaphoreci.com/imranismail/can)
+[![Hex Downloads](https://img.shields.io/hexpm/dt/can.svg)](https://hex.pm/packages/can)
+[![Hex Version](https://img.shields.io/hexpm/v/can.svg)](https://hex.pm/packages/can)
 
 ## Installation
 Add Can to your list of dependencies in `mix.exs`:
