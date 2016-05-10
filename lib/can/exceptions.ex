@@ -4,7 +4,7 @@ defmodule Can.MissingPrivateKeysError do
   def exception(opts) do
     key     = Keyword.fetch!(opts, :key)
     message = Keyword.get(opts, :message) ||
-      "you tried to use Can module but it requires the key `#{key}` " <>
+      "you tried to use Can but it requires the key `#{key}` " <>
       "to be assigned in the connection struct"
 
     %Can.MissingPrivateKeysError{message: message, key: key}
@@ -30,8 +30,8 @@ defmodule Can.NoHandlerError do
 
   def exception(opts) do
     message = Keyword.get(opts, :message) ||
-      "you tried to use Can but it requires the handler " <>
-      "to be able to handle the unauthorized connections"
+      "you tried to use Can but it requires the :handler " <>
+      "to be specified to be able to handle the unauthorized connections"
 
     %Can.NoHandlerError{message: message}
   end
@@ -50,14 +50,12 @@ defmodule Can.PhoenixNotLoadedError do
 end
 
 defmodule Can.UnauthorizedError do
-  defexception [:message, :policy, :resource, plug_status: 401]
+  defexception [:context, plug_status: 401, message: "this connection is not " <>
+                                                     "authorized to view this resource"]
 
   def exception(opts) do
-    policy   = Keyword.fetch!(opts, :policy)
-    resource = Keyword.fetch!(opts, :resource)
-    message  = Keyword.fetch!(opts, :message)
-
-    %Can.UnauthorizedError{message: message, policy: policy, resource: resource}
+    context = Keyword.fetch!(opts, :context)
+    %Can.UnauthorizedError{context: context}
   end
 end
 
