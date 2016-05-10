@@ -1,20 +1,21 @@
 defmodule Can do
   defmacro __using__(opts) do
     quote do
-      @unauthorized_handler opts[:handler] || raise Can.NoHandlerError
-      @unauthorized_module  opts[:module]  || __MODULE__
-
       import Can.Authorizer
       import Can
 
-      def action(conn, _), do 
+      @can_handler unquote(opts[:handler]) || raise Can.NoHandlerError
+      @can_module  unquote(opts[:module])  || __MODULE__
+
+      def action(conn, _) do
         try do
           args = [conn, conn.params]
           apply(__MODULE__, action_name(conn), args)
         rescue
           error in Can.UnauthorizedError ->
-            args = [conn, error[:resource], error[:policy]]
-            apply(@unauthorized_module, @unauthorized_function, args)
+            opts = Map.from_struct(error)
+            args = [conn, opts]
+            apply(@can_module, @can_handler, args)
         end
       end
 
@@ -22,15 +23,19 @@ defmodule Can do
     end
   end
 
-  defmacro can(conn, [{action, resource}] \\ nil) do
+  defmacro can(conn, action, resource \\ nil, opts \\ []) do
     quote do
-      case authorize(unquote(conn), unquote(action), unquote(resource)) do
-        {:ok, _}         -> 
+      conn     = unquote(conn)
+      action   = unquote(action)
+      resource = unquote(resource)
+      opts     = unquote(opts)
+
+      case authorize(conn, action, resource) do
+        :ok              ->
           conn
-        {:error, policy} -> 
-          raise Can.UnauthorizedError,
-            resource: unquote(resource), 
-            policy: policy
+        {:error, policy} ->
+          opts = opts ++ [resource: resource, policy: policy]
+          raise Can.UnauthorizedError, opts
       end
     end
   end
