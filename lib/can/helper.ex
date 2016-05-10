@@ -1,17 +1,15 @@
 defmodule Can.Helper do
-  alias Can.Exception
-
   def verify_policy!(policy) do
     if Code.ensure_loaded?(policy) do
       policy
     else
-      raise Exception.UndefinedPolicyError, policy: policy
+      raise Can.UndefinedPolicyError, policy: policy
     end
   end
 
   def verify_phoenix_deps! do
     unless Code.ensure_loaded?(Phoenix) do
-      raise Exception.PhoenixNotLoadedError
+      raise Can.PhoenixNotLoadedError
     end
   end
 
@@ -19,18 +17,17 @@ defmodule Can.Helper do
     if !!conn.private[key] do
       conn.private[key]
     else
-      raise Exception.MissingPrivateKeys, key: key
+      raise Can.MissingPrivateKeysError, key: key
     end
   end
 
   def policy_module(module, suffix \\ "") do
     module_parts = Module.split(module)
 
-    policy =
-      module_parts
-      |> List.last
-      |> unsuffix(suffix)
-      |> suffix("Policy")
+    policy = module_parts
+    |> List.last
+    |> unsuffix(suffix)
+    |> suffix("Policy")
 
     module_parts
     |> List.replace_at(length(module_parts) - 1, policy)
