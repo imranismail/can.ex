@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/127labs/can.png?label=ready&title=Ready)](https://waffle.io/127labs/can)
 # Can
 > Dead simple, fire and forget authorization kit for the Phoenix framework
 
