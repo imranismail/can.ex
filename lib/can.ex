@@ -7,7 +7,7 @@ defmodule Can do
     authorized?: false
   ]
 
-  def can(conn, policy, action, context) do
+  def can(conn, policy, action, context \\ []) do
     action = action || get_action(conn)
     policy = policy || get_policy(conn)
 
@@ -34,7 +34,7 @@ defmodule Can do
     can(conn, get_policy(conn), get_action(conn), context)
   end
 
-  def can!(conn, policy, action, context) do
+  def can!(conn, policy, action, context \\ []) do
     conn = can(conn, policy, action, context)
 
     if authorized?(conn) do
@@ -55,7 +55,7 @@ defmodule Can do
     can!(conn, get_policy(conn), get_action(conn), context)
   end
 
-  def can?(conn, policy, action, context) do
+  def can?(conn, policy, action, context \\ []) do
     if authorized?(conn) do
       true
     else
