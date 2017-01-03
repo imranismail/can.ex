@@ -42,7 +42,7 @@ defmodule Can do
       true
     else
       conn
-      |> can(policy, action_or_policy_with_action, context)
+      |> can(action_or_policy_with_action, context)
       |> authorized?()
     end
   end
