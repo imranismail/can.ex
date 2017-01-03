@@ -31,7 +31,7 @@ defmodule Can do
   end
 
   def put_policy(conn, policy) do
-    put_private(conn, :can, put_can(conn, :policy, policy))
+    put_can(conn, :policy, policy)
   end
 
   def get_policy(conn) do
@@ -39,7 +39,7 @@ defmodule Can do
   end
 
   def put_action(conn, action) do
-    put_private(conn, :can, put_can(conn, :action, action))
+    put_can(conn, :action, action)
   end
 
   def get_action(conn) do
@@ -51,6 +51,7 @@ defmodule Can do
       conn.private
       |> Map.get(:can, %Can{})
       |> Map.put(key, value)
+
     put_private(conn, :can, can)
   end
 
