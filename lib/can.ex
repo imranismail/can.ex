@@ -7,7 +7,8 @@ defmodule Can do
     authorized?: false
   ]
 
-  def can(conn, action_or_policy_with_action \\ nil, context \\ []) when is_list(context) do
+  def can(conn, action_or_policy_with_action \\ nil, context \\ [])
+  when is_list(context) and is_tuple(action_or_policy_with_action) or is_atom(action_or_policy_with_action) do
     {policy, action} =
       if is_tuple(action_or_policy_with_action) do
         action_or_policy_with_action
@@ -27,7 +28,8 @@ defmodule Can do
     if authorized?, do: authorize(conn), else: conn
   end
 
-  def can!(conn, action_or_policy_with_action \\ nil, context \\ []) when is_list(context) do
+  def can!(conn, action_or_policy_with_action \\ nil, context \\ [])
+  when is_list(context) and is_tuple(action_or_policy_with_action) or is_atom(action_or_policy_with_action) do
     conn = can(conn, action_or_policy_with_action, context)
 
     if authorized?(conn) do
@@ -37,7 +39,8 @@ defmodule Can do
     end
   end
 
-  def can?(conn, action_or_policy_with_action \\ nil, context \\ []) do
+  def can?(conn, action_or_policy_with_action \\ nil, context \\ [])
+  when is_list(context) and is_tuple(action_or_policy_with_action) or is_atom(action_or_policy_with_action) do
     if authorized?(conn) do
       true
     else
