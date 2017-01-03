@@ -21,7 +21,6 @@ defmodule Can.UnauthorizedError do
   defexception [
     plug_status: 401,
     message: "This connection is not authorized to perform this action",
-    action: nil,
     context: nil
   ]
 end

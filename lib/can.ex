@@ -14,16 +14,16 @@ defmodule Can do
     put_private(conn, :can, can)
   end
 
-  def can(conn, action \\ nil, context \\ []) when is_atom(action) and is_list(context) do
-    policy      = get_policy(conn)
-    action      = action || get_action(conn)
-    context     = [conn|context]
+  def can(conn, policy \\ nil, action \\ nil, context \\ []) when is_list(context) do
+    policy      = get_policy(conn, policy)
+    action      = get_action(conn, action)
+    context     = [conn, Enum.into(context, %{})]
     authorized? = apply_policy!(policy, action, context)
 
     if authorized? do
       authorize(conn)
     else
-      raise Can.UnauthorizedError, action: action, context: context
+      raise Can.UnauthorizedError, context: context
     end
   end
 
@@ -35,16 +35,20 @@ defmodule Can do
     put_can(conn, :policy, policy)
   end
 
-  def get_policy(conn) do
-    conn.private[:can].policy
+  def get_policy(conn, policy) do
+    conn.private[:can].policy || policy
   end
 
   def put_action(conn, action) do
     put_can(conn, :action, action)
   end
 
-  def get_action(conn) do
-    conn.private[:can].action
+  def get_action(conn, action) do
+    conn.private[:can].action || action
+  end
+
+  defp get_can(conn) do
+    Map.get(conn.private, :can)
   end
 
   defp put_can(conn, key, value) do
