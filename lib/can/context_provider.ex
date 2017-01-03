@@ -4,7 +4,7 @@ defmodule Can.ContextProvider do
   def call(conn, _opts) do
     action = fetch_action!(conn)
     policy = fetch_module!(conn)
-    can    = struct(__MODULE__, action: action, policy: policy)
+    can    = struct(Can, action: action, policy: policy)
     put_private(conn, :can, can)
   end
 
