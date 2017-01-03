@@ -7,18 +7,28 @@ defmodule Can do
     authorized?: false
   ]
 
-  def can(conn, policy \\ nil, action \\ nil, context \\ []) when is_list(context) do
-    policy      = policy || get_policy(conn)
-    action      = action || get_action(conn)
-    conn        = conn |> put_action(action) |> put_policy(policy)
-    context     = [conn, Enum.into(context, %{})]
+  def can(conn, action_or_policy_with_action \\ nil, context \\ []) when is_list(context) do
+    {policy, action} =
+      if is_tuple(action_or_policy_with_action) do
+        action_or_policy_with_action
+      else
+        {get_policy(conn), action_or_policy_with_action || get_action(conn)}
+      end
+
+    conn =
+      conn
+      |> put_action(action)
+      |> put_policy(policy)
+
+    context = [conn, Enum.into(context, %{})]
+
     authorized? = apply_policy!(policy, action, context)
 
     if authorized?, do: authorize(conn), else: conn
   end
 
-  def can!(conn, policy \\ nil, action \\ nil, context \\ []) when is_list(context) do
-    conn = can(conn, policy, action, context)
+  def can!(conn, action_or_policy_with_action \\ nil, context \\ []) when is_list(context) do
+    conn = can(conn, action_or_policy_with_action, context)
 
     if authorized?(conn) do
       conn
@@ -27,12 +37,12 @@ defmodule Can do
     end
   end
 
-  def can?(conn, policy \\ nil, action \\ nil, context \\ []) do
+  def can?(conn, action_or_policy_with_action \\ nil, context \\ []) do
     if authorized?(conn) do
       true
     else
       conn
-      |> can(policy, action, context)
+      |> can(policy, action_or_policy_with_action, context)
       |> authorized?()
     end
   end
