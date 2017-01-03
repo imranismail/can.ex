@@ -1,9 +1,9 @@
 defmodule Can.ContextProvider do
   use Plug.Builder
 
-  def call(conn, _opts) do
-    action = fetch_action!(conn)
-    policy = fetch_module!(conn)
+  def call(conn, opts) do
+    action = Keyword.get(opts, :action, fetch_action!(conn))
+    policy = Keyword.get(opts, :policy, fetch_module!(conn))
     can    = struct(Can, action: action, policy: policy)
     put_private(conn, :can, can)
   end
