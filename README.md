@@ -17,7 +17,7 @@ end
 
 ## Usage
 
-### Inferring Policies from Controller Names
+### Inferring policy from controller name and action
 
 ```elixir
 # in web.ex
@@ -63,9 +63,7 @@ defmodule MyApp.ErrorView do
 end
 ```
 
-### Overriding Inferred Policy or Action
-
-#### Plug
+### Overriding inferred policy or action with plug
 
 ```elixir
 # in post_controller.ex
@@ -88,7 +86,7 @@ defmodule MyApp.PostController do
 end
 ```
 
-#### Connection Transformation
+### Overriding inferred policy or action with `%Conn{}` transformation
 
 ```elixir
 # in post_controller.ex
