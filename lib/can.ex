@@ -47,9 +47,11 @@ defmodule Can do
   end
 
   defp put_can(conn, key, value) do
-    conn.private
-    |> Map.get(:can, %Can{})
-    |> Map.put(key, value)
+    can =
+      conn.private
+      |> Map.get(:can, %Can{})
+      |> Map.put(key, value)
+    put_private(conn, :can, can)
   end
 
   defp apply_policy!(policy, function, args) do
