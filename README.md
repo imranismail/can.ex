@@ -30,16 +30,23 @@ defmodule MyApp.Web do
   end
 end
 
-# in page_controller.ex
-defmodule MyApp.PageController do
+# in post_controller.ex
+defmodule MyApp.PostController do
   use MyApp.Web, :controller
 
   def show(conn, %{"id" => id}) do
-    page = Repo.get(Page, id)
+    post = Repo.get(Post, id)
 
     conn
-    |> can(page: page)
-    |> render("show.html", page: page)
+    |> can!(post: post)
+    |> render("show.html", post: post)
+  end
+end
+
+# in post_policy.ex
+defmodule MyApp.PostPolicy do
+  def show(conn, context) do
+    context[:post].author_id == Auth.current.id
   end
 end
 
@@ -48,8 +55,8 @@ defmodule MyApp.ErrorView do
   use MyApp.Web, :view
 
   # ...other definitions
-  def render("401.html", assigns) do
-    "Internal server error"
+  def render("401.html", %{reason: %{context: %{post: post}}}) do
+    "You are not authorized to view #{post.id}"
   end
 end
 ```
