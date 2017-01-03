@@ -46,7 +46,7 @@ end
 # in post_policy.ex
 defmodule MyApp.PostPolicy do
   def show(conn, context) do
-    context[:post].author_id == Auth.current.id
+    context[:post].author_id == Auth.current(conn).id
   end
 end
 
