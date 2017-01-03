@@ -17,6 +17,8 @@ end
 
 ## Usage
 
+### Inferring Policies from Controller Names
+
 ```elixir
 # in web.ex
 defmodule MyApp.Web do
@@ -57,6 +59,74 @@ defmodule MyApp.ErrorView do
   # ...other definitions
   def render("401.html", %{reason: %{context: %{post: post}}}) do
     "You are not authorized to view #{post.id}"
+  end
+end
+```
+
+### Overriding Inferred Policy or Action
+
+#### Plug
+
+```elixir
+# in post_controller.ex
+defmodule MyApp.PostController do
+  use MyApp.Web, :controller
+
+  plug Can.ContextProvider, policy: __MODULE__, action: :show_post
+
+  def show(conn, %{"id" => id}) do
+    post = Repo.get(Post, id)
+
+    conn
+    |> can!(post: post)
+    |> render("show.html", post: post)
+  end
+
+  def show_post(conn, context) do
+    context[:post].author_id == Auth.current(conn).id
+  end
+end
+```
+
+#### Connection Transformation
+
+```elixir
+# in post_controller.ex
+defmodule MyApp.PostController do
+  use MyApp.Web, :controller
+
+  def show(conn, %{"id" => id}) do
+    post = Repo.get(Post, id)
+
+    conn
+    |> put_policy(__MODULE__)
+    |> can!(:show_post, post: post)
+    |> render("show.html", post: post)
+  end
+
+  def show_post(conn, context) do
+    context[:post].author_id == Auth.current(conn).id
+  end
+end
+```
+
+```elixir
+# in post_controller.ex
+defmodule MyApp.PostController do
+  use MyApp.Web, :controller
+
+  def show(conn, %{"id" => id}) do
+    post = Repo.get(Post, id)
+
+    conn
+    |> put_policy(__MODULE__)
+    |> put_action(:show_post)
+    |> can!(post: post)
+    |> render("show.html", post: post)
+  end
+
+  def show_post(conn, context) do
+    context[:post].author_id == Auth.current(conn).id
   end
 end
 ```
