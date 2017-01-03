@@ -128,3 +128,24 @@ defmodule MyApp.PostController do
   end
 end
 ```
+
+### Usage in views
+
+```elixir
+# in web.ex
+defmodule MyApp.Web do
+  def view() do
+    quote do
+      # ...other definitions
+      import Can
+    end
+  end
+end
+
+# in layout.html.slim
+.nav_menu
+  = if can?(@conn, :index) do
+    = link_to("POSTS", post_path(@conn, :index))
+  = if can?(@conn, :superadmin?) do
+    = link_to("SETTINGS", setting_path(@conn, :index))
+```
