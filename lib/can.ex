@@ -67,10 +67,6 @@ defmodule Can do
     conn.private[:can].action || action
   end
 
-  defp get_can(conn) do
-    Map.get(conn.private, :can)
-  end
-
   defp put_can(conn, key, value) do
     can =
       conn.private
