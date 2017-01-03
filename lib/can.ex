@@ -17,7 +17,7 @@ defmodule Can do
   def can(conn, action \\ nil, context \\ []) when is_atom(action) and is_list(context) do
     policy      = get_policy(conn)
     action      = action || get_action(conn)
-    authorized? = apply_policy(policy, action, context)
+    authorized? = apply_policy!(policy, action, context)
 
     if authorized? do
       authorize(conn)
@@ -27,7 +27,7 @@ defmodule Can do
   end
 
   def authorize(conn, boolean \\ true) do
-    put_can(:authorized?, boolean)
+    put_can(conn, :authorized?, boolean)
   end
 
   def put_policy(conn, policy) do
@@ -66,12 +66,6 @@ defmodule Can do
     end
   end
 
-  defp verify_phoenix_deps! do
-    unless Code.ensure_loaded?(Phoenix) do
-      raise Can.PhoenixNotLoadedError
-    end
-  end
-
   defp fetch_action!(conn) do
     Map.fetch!(conn.private, :phoenix_action)
   end
@@ -82,7 +76,7 @@ defmodule Can do
     |> infer_policy("Controller")
   end
 
-  defp infer_policy(module, suffix \\ "") do
+  defp infer_policy(module, suffix) do
     module_parts = Module.split(module)
 
     policy =

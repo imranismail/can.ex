@@ -17,18 +17,11 @@ defmodule Can.UndefinedPolicyError do
   end
 end
 
-defmodule Can.PhoenixNotLoadedError do
-  defexception [
-    plug_status: 500
-    message: "you tried to use `Can` but it requires `Phoenix` to be loaded as a dependency"
-  ]
-end
-
 defmodule Can.UnauthorizedError do
   defexception [
     plug_status: 401,
     message: "This connection is not authorized to perform this action",
-    action: action,
-    context: context
+    action: nil,
+    context: nil
   ]
 end
