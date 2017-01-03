@@ -7,7 +7,7 @@ defmodule Can do
     authorized?: false
   ]
 
-  def can(conn, policy, action, context \\ []) do
+  def can(conn, policy, action, context) do
     action = action || get_action(conn)
     policy = policy || get_policy(conn)
 
@@ -23,18 +23,19 @@ defmodule Can do
     if authorized?, do: authorize(conn), else: conn
   end
 
-  def can(conn, action_or_policy_with_action_or_context \\ nil)
-  def can(conn, {policy, action}) do
-    can(conn, policy, action, [])
+  def can(conn, action, context) when is_atom(action) and is_list(context) do
+    can(conn, get_policy(conn), action, context)
   end
+
   def can(conn, action) when is_atom(action) do
     can(conn, get_policy(conn), action, [])
   end
+
   def can(conn, context) when is_list(context) do
     can(conn, get_policy(conn), get_action(conn), context)
   end
 
-  def can!(conn, policy, action, context \\ []) do
+  def can!(conn, policy, action, context) when is_atom(action) and is_list(context) do
     conn = can(conn, policy, action, context)
 
     if authorized?(conn) do
@@ -44,18 +45,19 @@ defmodule Can do
     end
   end
 
-  def can!(conn, action_or_policy_with_action_or_context \\ nil)
-  def can!(conn, {policy, action}) do
-    can!(conn, policy, action, [])
+  def can!(conn, action, context) when is_atom(action) and is_list(context) do
+    can!(conn, get_policy(conn), action, context)
   end
+
   def can!(conn, action) when is_atom(action) do
     can!(conn, get_policy(conn), action, [])
   end
+
   def can!(conn, context) when is_list(context) do
     can!(conn, get_policy(conn), get_action(conn), context)
   end
 
-  def can?(conn, policy, action, context \\ []) do
+  def can?(conn, policy, action, context) when is_atom(action) and is_list(context) do
     if authorized?(conn) do
       true
     else
@@ -65,13 +67,14 @@ defmodule Can do
     end
   end
 
-  def can?(conn, action_or_policy_with_action_or_context \\ nil)
-  def can?(conn, {policy, action}) do
-    can?(conn, policy, action, [])
+  def can?(conn, action, context) when is_atom(action) and is_list(context) do
+    can?(conn, get_policy(conn), action, context)
   end
+
   def can?(conn, action) when is_atom(action) do
     can?(conn, get_policy(conn), action, [])
   end
+
   def can?(conn, context) when is_list(context) do
     can?(conn, get_policy(conn), get_action(conn), context)
   end
