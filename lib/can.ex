@@ -20,15 +20,35 @@ defmodule Can do
     context     = [conn, Enum.into(context, %{})]
     authorized? = apply_policy!(policy, action, context)
 
-    if authorized? do
-      authorize(conn)
+    if authorized?, do: authorize(conn), else: conn
+  end
+
+  def can!(conn, policy \\ nil, action \\ nil, context \\ []) when is_list(context) do
+    conn = can(conn, policy, action, context)
+
+    if authorized?(conn) do
+      conn
     else
       raise Can.UnauthorizedError, context: context
     end
   end
 
+  def can?(conn, policy \\ nil, action \\ nil, context \\ []) do
+    if authorized?(conn) do
+      true
+    else
+      conn
+      |> can(policy, action, context)
+      |> authorized?()
+    end
+  end
+
   def authorize(conn, boolean \\ true) do
     put_can(conn, :authorized?, boolean)
+  end
+
+  def authorized?(conn) do
+    conn.private[:can].authorized?
   end
 
   def put_policy(conn, policy) do
