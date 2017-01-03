@@ -7,14 +7,9 @@ defmodule Can do
     authorized?: false
   ]
 
-  def can(conn, action_or_policy_with_action \\ nil, context \\ [])
-  when is_list(context) and is_tuple(action_or_policy_with_action) or is_atom(action_or_policy_with_action) do
-    {policy, action} =
-      if is_tuple(action_or_policy_with_action) do
-        action_or_policy_with_action
-      else
-        {get_policy(conn), action_or_policy_with_action || get_action(conn)}
-      end
+  def can(conn, policy, action, context) do
+    action = action || get_action(conn)
+    policy = policy || get_policy(conn)
 
     conn =
       conn
@@ -28,9 +23,19 @@ defmodule Can do
     if authorized?, do: authorize(conn), else: conn
   end
 
-  def can!(conn, action_or_policy_with_action \\ nil, context \\ [])
-  when is_list(context) and is_tuple(action_or_policy_with_action) or is_atom(action_or_policy_with_action) do
-    conn = can(conn, action_or_policy_with_action, context)
+  def can(conn, action_or_policy_with_action_or_context \\ nil)
+  def can(conn, {policy, action}) do
+    can(conn, policy, action, [])
+  end
+  def can(conn, action) when is_atom(action) do
+    can(conn, get_policy(conn), action, [])
+  end
+  def can(conn, context) when is_list(context) do
+    can(conn, get_policy(conn), get_action(conn), context)
+  end
+
+  def can!(conn, policy, action, context) do
+    conn = can(conn, policy, action, context)
 
     if authorized?(conn) do
       conn
@@ -39,15 +44,36 @@ defmodule Can do
     end
   end
 
-  def can?(conn, action_or_policy_with_action \\ nil, context \\ [])
-  when is_list(context) and is_tuple(action_or_policy_with_action) or is_atom(action_or_policy_with_action) do
+  def can!(conn, action_or_policy_with_action_or_context \\ nil)
+  def can!(conn, {policy, action}) do
+    can!(conn, policy, action, [])
+  end
+  def can!(conn, action) when is_atom(action) do
+    can!(conn, get_policy(conn), action, [])
+  end
+  def can!(conn, context) when is_list(context) do
+    can!(conn, get_policy(conn), get_action(conn), context)
+  end
+
+  def can?(conn, policy, action, context) do
     if authorized?(conn) do
       true
     else
       conn
-      |> can(action_or_policy_with_action, context)
+      |> can(policy, action, context)
       |> authorized?()
     end
+  end
+
+  def can?(conn, action_or_policy_with_action_or_context \\ nil)
+  def can?(conn, {policy, action}) do
+    can?(conn, policy, action, [])
+  end
+  def can?(conn, action) when is_atom(action) do
+    can?(conn, get_policy(conn), action, [])
+  end
+  def can?(conn, context) when is_list(context) do
+    can?(conn, get_policy(conn), get_action(conn), context)
   end
 
   def authorize(conn, boolean \\ true) do
