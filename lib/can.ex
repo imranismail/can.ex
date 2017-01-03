@@ -35,6 +35,10 @@ defmodule Can do
     can(conn, get_policy(conn), get_action(conn), context)
   end
 
+  def can(conn) do
+    can(conn, get_policy(conn), get_action(conn), [])
+  end
+
   def can!(conn, policy, action, context) when is_atom(action) and is_list(context) do
     conn = can(conn, policy, action, context)
 
@@ -57,6 +61,10 @@ defmodule Can do
     can!(conn, get_policy(conn), get_action(conn), context)
   end
 
+  def can!(conn) do
+    can!(conn, get_policy(conn), get_action(conn), [])
+  end
+
   def can?(conn, policy, action, context) when is_atom(action) and is_list(context) do
     if authorized?(conn) do
       true
@@ -77,6 +85,10 @@ defmodule Can do
 
   def can?(conn, context) when is_list(context) do
     can?(conn, get_policy(conn), get_action(conn), context)
+  end
+
+  def can?(conn) do
+    can?(conn, get_policy(conn), get_action(conn), [])
   end
 
   def authorize(conn, boolean \\ true) do
