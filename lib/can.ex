@@ -10,6 +10,7 @@ defmodule Can do
   def can(conn, policy \\ nil, action \\ nil, context \\ []) when is_list(context) do
     policy      = policy || get_policy(conn)
     action      = action || get_action(conn)
+    conn        = conn |> put_action(action) |> put_policy(policy)
     context     = [conn, Enum.into(context, %{})]
     authorized? = apply_policy!(policy, action, context)
 
