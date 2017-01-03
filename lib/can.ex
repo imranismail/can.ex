@@ -16,9 +16,7 @@ defmodule Can do
       |> put_action(action)
       |> put_policy(policy)
 
-    context = [conn, Enum.into(context, %{})]
-
-    authorized? = apply_policy!(policy, action, context)
+    authorized? = apply_policy!(policy, action, [conn, Enum.into(context, %{})])
 
     if authorized?, do: authorize(conn), else: conn
   end
@@ -45,7 +43,7 @@ defmodule Can do
     if authorized?(conn) do
       conn
     else
-      raise Can.UnauthorizedError, context: context
+      raise Can.UnauthorizedError, context: Enum.into(context, %{})
     end
   end
 
