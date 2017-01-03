@@ -11,108 +11,141 @@ Add Can to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:can, "~>0.0.4"}]
+  [{:can, "~>0.0.5"}]
 end
 ```
 
 ## Usage
-Generally, there are two things you need to explicitly implement in your application.
 
-For this controller and action
-
-```elixir
-defmodule MyApp.PageController do
-  def show(conn, %{"id" => id}) do
-    page = Repo.get(Page, id)
-    render(conn, "show.html", page: page)
-  end
-end
-```
-
-#### Step 1
-
-Use the can macro and add an unauthorized_handler
+### Inferring policy from controller name and action
 
 ```elixir
-defmodule MyApp.PageController do
-  use MyApp.Web, :controller
-  use Can, :unauthorized
+# in web.ex
+defmodule MyApp.Web do
+  def controller() do
+    quote do
+      # ...other definitions
+      import Can
 
-  def show(conn, %{"id" => id}) do
-    page = Repo.get(Page, id)
-
-    can(conn, page) do
-      render(conn, "show.html", page: page)
-    end
-  end
-
-  def unauthorized(conn, resource, policy) do
-    conn
-    |> put_flash(:error, "You are unauthorized because #{policy} did not return true for author id #{resource[:author_id]}")
-    |> render("show.html", page: resource)
-  end
-end
-```
-
-#### Step 2
-
-Add the policy module and function
-
-Can will try to find the policy based on the second argument and the following pattern, therefore we need to adhere
-to a convention set by Phoenix
-
-- if no argument or `nil` is passed -> the policy will be based off the controller's name
-- if changeset or model struct is passed -> the policy will be based off the model's name
-
-```elixir
-def MyApp.PagePolicy do
-  def show(conn, page) do
-    conn.assign.current_user.id == page[:author_id]
-  end
-end
-```
-
-### Alternative Handler
-
-The unauthorized handler can also be done in a separate module if you wish so.
-
-This effectively separates the handler and the controller, and makes pattern matching against the policy clean, readable and reusable.
-
-```elixir
-defmodule MyApp.PageController do
-  use MyApp.Web, :controller
-  use Can, {MyApp.UnauthorizedHandler, :unauthorized}
-
-  def show(conn, %{"id" => id}) do
-    page = Repo.get(Page, id)
-
-    can(conn, page) do
-      render(conn, "show.html", page: page)
+      plug Can.ContextProvider
     end
   end
 end
 
-defmodule MyApp.UnauthorizedHandler do
-  import Phoenix.Controller
+# in post_controller.ex
+defmodule MyApp.PostController do
+  use MyApp.Web, :controller
 
-  def unauthorized(conn, resource, PagePolicy) do
+  def show(conn, %{"id" => id}) do
+    post = Repo.get(Post, id)
+
     conn
-    |> put_flash(:error, "You are unauthorized because #{policy} did not return true for author id #{resource[:author_id]}")
-    |> render("show.html", page: resource)
+    |> can!(post: post)
+    |> render("show.html", post: post)
   end
+end
 
-  # wildcard
-  def unauthorized(conn, _resource, policy) do
-    conn
-    |> put_flash(:error, "You are unauthorized because #{policy} did not return true")
-    |> render(MyApp.ErrorView, "401.html")
+# in post_policy.ex
+defmodule MyApp.PostPolicy do
+  def show(conn, context) do
+    context[:post].author_id == Auth.current(conn).id
+  end
+end
+
+# in error_view.ex
+defmodule MyApp.ErrorView do
+  use MyApp.Web, :view
+
+  # ...other definitions
+  def render("401.html", %{reason: %{context: %{post: post}}}) do
+    "You are not authorized to view #{post.id}"
   end
 end
 ```
 
-You can write your own authorization logic as complex or as simple as you wish. It is necessary however, at the end of your authorization logic, it has to return a boolean value.
+### Overriding inferred policy or action with plug
 
-In the case when the authorization logic returns true, the connection proceeds normally. If the authorization logic return false, the unauthorized handler will be called instead.
+```elixir
+# in post_controller.ex
+defmodule MyApp.PostController do
+  use MyApp.Web, :controller
 
-## Documentation
-See [documentation](http://hexdocs.pm/can/) on hexdocs for API reference and usage details.
+  plug Can.ContextProvider, policy: __MODULE__, action: :show_post
+
+  def show(conn, %{"id" => id}) do
+    post = Repo.get(Post, id)
+
+    conn
+    |> can!(post: post)
+    |> render("show.html", post: post)
+  end
+
+  def show_post(conn, context) do
+    context[:post].author_id == Auth.current(conn).id
+  end
+end
+```
+
+### Overriding inferred policy or action with `%Conn{}` transformation
+
+```elixir
+# in post_controller.ex
+defmodule MyApp.PostController do
+  use MyApp.Web, :controller
+
+  def show(conn, %{"id" => id}) do
+    post = Repo.get(Post, id)
+
+    conn
+    |> put_policy(__MODULE__)
+    |> can!(:show_post, post: post)
+    |> render("show.html", post: post)
+  end
+
+  def show_post(conn, context) do
+    context[:post].author_id == Auth.current(conn).id
+  end
+end
+```
+
+```elixir
+# in post_controller.ex
+defmodule MyApp.PostController do
+  use MyApp.Web, :controller
+
+  def show(conn, %{"id" => id}) do
+    post = Repo.get(Post, id)
+
+    conn
+    |> put_policy(__MODULE__)
+    |> put_action(:show_post)
+    |> can!(post: post)
+    |> render("show.html", post: post)
+  end
+
+  def show_post(conn, context) do
+    context[:post].author_id == Auth.current(conn).id
+  end
+end
+```
+
+### Usage in views
+
+```elixir
+# in web.ex
+defmodule MyApp.Web do
+  def view() do
+    quote do
+      # ...other definitions
+      import Can
+    end
+  end
+end
+
+# in layout.html.slim
+.nav_menu
+  = if can?(@conn, :index) do
+    = link_to("POSTS", post_path(@conn, :index))
+  = if can?(@conn, :superadmin?) do
+    = link_to("SETTINGS", setting_path(@conn, :index))
+```
