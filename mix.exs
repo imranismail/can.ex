@@ -3,13 +3,13 @@ defmodule Can.Mixfile do
 
   def project do
     [app: :can,
-     version: "0.0.4",
+     version: "0.0.5",
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps,
-     description: description,
-     package: package,]
+     deps: deps(),
+     description: description(),
+     package: package(),]
   end
 
   # Configuration for the OTP application
